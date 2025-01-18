@@ -1,0 +1,42 @@
+# docker-compose.yml
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - NODE_ENV=development  # Added for development features
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/build  # Added to prevent build folder conflicts
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app  # Added for backend code
+      - ./models:/app/models
+    environment:
+      - FLASK_DEBUG=True
+      - PYTHONUNBUFFERED=1  # Added for better logging
+    # Kept your original debugging command
+    command: >
+      sh -c "
+        echo '=== Debugging Info ===' &&
+        echo 'Current directory:' &&
+        pwd &&
+        echo '\nContents of /app:' &&
+        ls -la /app &&
+        echo '\nContents of /app/models:' &&
+        ls -la /app/models &&
+        echo '\nStarting application...' &&
+        python app.py"
